@@ -14,6 +14,7 @@ contract MaybePay is Owned {
     struct Order {
         uint256 value;
         uint256 price;
+        uint256 timestamp;
         address buyer;
         Status status;
     }
@@ -59,10 +60,11 @@ contract MaybePay is Owned {
         uint256 value = msg.value;
         require(value >= price, "value must be geq price");
         require(price > 0, "price must be greater than 0");
-        orders[orderIndex] = Order({buyer: msg.sender, value: value, price: price, status: Status.PENDING});
+        orders[orderIndex] =
+            Order({buyer: msg.sender, value: value, price: price, timestamp: block.timestamp, status: Status.PENDING});
         orderIndex++;
 
-        emit OrderPlaced(orderIndex, value, price, msg.sender);
+        emit OrderPlaced(orderIndex - 1, value, price, msg.sender);
     }
 
     // helpers

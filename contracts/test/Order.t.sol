@@ -48,7 +48,7 @@ contract OrderTest is Test {
         maybePay.processOrder(0, 123);
         vm.stopPrank();
 
-        (,,, MaybePay.Status status) = maybePay.orders(0);
+        (,,,, MaybePay.Status status) = maybePay.orders(0);
         assertEq(uint256(status), uint256(MaybePay.Status.PAID));
         assertEq(owner.balance, startingBalance + 1 ether);
     }
@@ -66,7 +66,7 @@ contract OrderTest is Test {
         maybePay.processOrder(0, 999);
         vm.stopPrank();
 
-        (,,, MaybePay.Status status) = maybePay.orders(0);
+        (,,,, MaybePay.Status status) = maybePay.orders(0);
         assertEq(uint256(status), uint256(MaybePay.Status.FREE));
         assertEq(buyer.balance, startingBalance);
     }
@@ -75,7 +75,7 @@ contract OrderTest is Test {
         vm.prank(buyer);
         maybePay.placeOrder{value: 2 ether}(1 ether);
 
-        (uint256 value, uint256 price, address orderBuyer, MaybePay.Status status) = maybePay.orders(0);
+        (uint256 value, uint256 price,, address orderBuyer, MaybePay.Status status) = maybePay.orders(0);
 
         assertEq(value, 2 ether);
         assertEq(price, 1 ether);

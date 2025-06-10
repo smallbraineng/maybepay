@@ -20,7 +20,7 @@ contract MaybePayTest is Test {
         uint256 price = 1 ether;
         maybePay.placeOrder{value: 2 ether}({price: price});
 
-        (uint256 value, uint256 orderPrice, address buyer, MaybePay.Status status) = maybePay.orders(0);
+        (uint256 value, uint256 orderPrice,, address buyer, MaybePay.Status status) = maybePay.orders(0);
 
         assertEq(value, 2 ether);
         assertEq(orderPrice, price);
@@ -44,7 +44,7 @@ contract MaybePayTest is Test {
         maybePay.processOrder({id: 0, ownerRng: 123});
         vm.stopPrank();
 
-        (,,, MaybePay.Status status) = maybePay.orders(0);
+        (,,,, MaybePay.Status status) = maybePay.orders(0);
         assertTrue(status == MaybePay.Status.PAID);
     }
 
