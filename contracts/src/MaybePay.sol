@@ -64,7 +64,7 @@ contract MaybePay is Owned {
             Order({buyer: msg.sender, value: value, price: price, timestamp: block.timestamp, status: Status.PENDING});
         orderIndex++;
 
-        emit OrderPlaced(orderIndex, value, price, msg.sender);
+        emit OrderPlaced(orderIndex - 1, value, price, msg.sender);
     }
 
     // helpers
