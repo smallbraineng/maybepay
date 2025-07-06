@@ -1,12 +1,12 @@
-import type { Product } from "../config";
-import ProductCard from "./ProductCard";
+import type { Product } from '../config'
+import ProductCard from './ProductCard'
 
 const ProductGrid = ({
   products,
   onProductClick,
 }: {
-  products: Product[];
-  onProductClick: (product: Product) => void;
+  products: Product[]
+  onProductClick: (product: Product) => void
 }) => {
   return (
     <div className="mx-auto grid w-full max-w-4xl grid-cols-2 md:grid-cols-4 gap-6">
@@ -18,7 +18,7 @@ const ProductGrid = ({
         />
       ))}
     </div>
-  );
-};
+  )
+}
 
-export default ProductGrid;
+export default ProductGrid

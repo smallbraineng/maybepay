@@ -1,55 +1,30 @@
-import { useState } from "react";
-import type { Product } from "./config";
-import { products } from "./config";
-import ProductGrid from "./components/ProductGrid";
-import ProductModal from "./components/ProductModal";
-import { useStore } from "./store";
+import { Route, Router, useLocation } from 'wouter'
+import CheckoutPage from './components/CheckoutPage'
+import ProductGrid from './components/ProductGrid'
+import ProductPage from './components/ProductPage'
+import type { Product } from './config'
+import { products } from './config'
 
-const App = () => {
-  const { placeOrder, isPlacing } = useStore();
-  const [selectedProduct, setSelectedProduct] = useState<Product | undefined>(
-    undefined,
-  );
-  const [isModalOpen, setIsModalOpen] = useState(false);
+const HomePage = () => {
+  const [, setLocation] = useLocation()
 
   const handleProductClick = (product: Product) => {
-    setSelectedProduct(product);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedProduct(undefined);
-  };
-
-  const handleOrder = async (product: Product) => {
-    try {
-      await placeOrder(BigInt(Math.floor(product.price * 1e18)));
-      console.log(`Order placed for ${product.title}`);
-    } catch (error) {
-      console.error("Failed to place order:", error);
-    }
-  };
+    setLocation(`/product/${product.id}`)
+  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col gap-24 m-6">
       <header
-        className="flex tracking-tight"
-        style={{ fontFamily: "EB Garamond" }}
+        className="flex tracking-tight justify-between text-xs md:text-base lg:text-md"
+        style={{ fontFamily: 'EB Garamond' }}
       >
         <h1 className="text-stone-900">Small Brain Engineering, Inc.</h1>
+        <h1>Limited Release of 50</h1>
       </header>
 
       <main className="p-6">
         <ProductGrid products={products} onProductClick={handleProductClick} />
       </main>
-
-      <ProductModal
-        product={selectedProduct}
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        onOrder={handleOrder}
-      />
 
       <div className="w-full relative">
         <img
@@ -59,9 +34,9 @@ const App = () => {
         />
         <div className="absolute right-6 bottom-6 text-end text-stone-100">
           <h1
-            className="text-6xl tracking-tighter"
+            className="text-2xl md:text-3xl lg:text-6xl tracking-tighter"
             style={{
-              fontFamily: "EB Garamond",
+              fontFamily: 'EB Garamond',
             }}
           >
             Think Small Brain.
@@ -69,7 +44,20 @@ const App = () => {
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default App;
+const App = () => {
+  return (
+    <Router>
+      <Route path="/" component={HomePage} />
+      <Route path="/product/:id" component={ProductPage} />
+      <Route
+        path="/checkout/:productId/:color/:size?"
+        component={CheckoutPage}
+      />
+    </Router>
+  )
+}
+
+export default App

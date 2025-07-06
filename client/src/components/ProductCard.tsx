@@ -1,16 +1,18 @@
-import type { Product } from "../config";
+import type { Product } from '../config'
 
 const ProductCard = ({
   product,
   onClick,
 }: {
-  product: Product;
-  onClick: (product: Product) => void;
+  product: Product
+  onClick: (product: Product) => void
 }) => {
   return (
-    <div
-      className="cursor-pointer flex gap-2 flex-col items-center"
+    <button
+      type="button"
+      className="cursor-pointer flex gap-2 flex-col items-center border-none bg-transparent p-0"
       onClick={() => onClick(product)}
+      aria-label={`View details for ${product.title}`}
     >
       <img
         src={product.image}
@@ -20,22 +22,22 @@ const ProductCard = ({
       <div className="flex items-center gap-2">
         <h3
           className="text-stone-900 tracking-tight"
-          style={{ fontFamily: "EB Garamond" }}
+          style={{ fontFamily: 'EB Garamond' }}
         >
           {product.title}
         </h3>
         <div className="flex gap-0.5">
-          {product.colors.reverse().map((color, index) => (
+          {product.colors.reverse().map((color) => (
             <div
-              key={index}
+              key={color}
               className="w-3 h-3"
               style={{ backgroundColor: color }}
             />
           ))}
         </div>
       </div>
-    </div>
-  );
-};
+    </button>
+  )
+}
 
-export default ProductCard;
+export default ProductCard

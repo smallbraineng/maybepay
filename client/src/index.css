@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @font-face {
-  font-family: 'EB Garamond';
-  src: url('../assets/EBGaramond-VariableFont_wght.ttf') format('truetype');
+  font-family: "EB Garamond";
+  src: url("../assets/EBGaramond-VariableFont_wght.ttf") format("truetype");
   font-weight: 100 900;
   font-display: swap;
 }
