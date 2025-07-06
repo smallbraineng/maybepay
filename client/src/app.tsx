@@ -32,13 +32,13 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="p-6 border-b border-stone-900">
+    <div className="min-h-screen bg-white flex flex-col gap-6 m-6">
+      <header className="">
         <h1
-          className="text-4xl text-stone-900"
+          className="text-xl font-bold text-stone-900 tracking-tight"
           style={{ fontFamily: "EB Garamond" }}
         >
-          Buy Now, Pay Maybe
+          Small Brain, Big Store
         </h1>
       </header>
 
