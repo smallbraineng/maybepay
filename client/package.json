@@ -4,13 +4,18 @@
   "type": "module",
   "private": true,
   "scripts": {
-    "dev": "bun --hot index.html",
-    "build": "bun build index.tsx --outdir=dist --target=browser",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "fix": "biome check --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
-    "@types/bun": "latest"
+    "@tailwindcss/vite": "^4.1.8",
+    "@types/bun": "latest",
+    "@vitejs/plugin-react": "^4.5.2",
+    "tailwindcss": "^4.1.8",
+    "vite": "^6.3.5"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -18,9 +23,14 @@
   "dependencies": {
     "@types/react": "^19.1.7",
     "@types/react-dom": "^19.1.6",
+    "@xyflow/react": "^12.8.2",
+    "framer-motion": "^12.23.6",
+    "rc-slider": "^11.1.8",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "rxjs": "^7.8.2",
     "viem": "^2.31.0",
+    "wouter": "^3.7.1",
     "zustand": "^5.0.5"
   }
 }

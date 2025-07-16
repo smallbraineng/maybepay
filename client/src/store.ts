@@ -10,6 +10,8 @@ import { privateKeyToAccount } from 'viem/accounts'
 import { foundry } from 'viem/chains'
 import { create } from 'zustand'
 
+// connect wallet OR connect abstract global wallet
+
 const ANVIL_PRIVATE_KEY =
   '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80' as Hex
 const CONTRACT_ADDRESS = '0x5fbdb2315678afecb367f032d93f642f64180aa3' as Address
@@ -30,16 +32,24 @@ type Order = {
   status: Status
 }
 
+type InventoryItem = {
+  color: string
+  size?: string
+  stock: number
+}
+
 type Store = {
   orders: Order[]
   isPlacing: boolean
   syncInterval: NodeJS.Timeout | undefined
   lastPlacedOrderId: number | undefined
+  inventory: Record<string, InventoryItem[]>
 
   placeOrder: (price: bigint) => Promise<void>
   syncOrders: () => Promise<void>
   startSync: () => void
   stopSync: () => void
+  getInventory: (productId: string) => InventoryItem[]
 }
 
 const abi = parseAbi([
@@ -65,6 +75,39 @@ export const useStore = create<Store>((set, get) => ({
   isPlacing: false,
   syncInterval: undefined,
   lastPlacedOrderId: undefined,
+  inventory: {
+    '1': [
+      { color: '#1c1917', size: 'S', stock: 5 },
+      { color: '#1c1917', size: 'M', stock: 8 },
+      { color: '#1c1917', size: 'L', stock: 3 },
+      { color: '#1c1917', size: 'XL', stock: 2 },
+      { color: '#e7e5e4', size: 'S', stock: 4 },
+      { color: '#e7e5e4', size: 'M', stock: 6 },
+      { color: '#e7e5e4', size: 'L', stock: 7 },
+      { color: '#e7e5e4', size: 'XL', stock: 1 },
+    ],
+    '2': [
+      { color: '#1c1917', size: 'S', stock: 3 },
+      { color: '#1c1917', size: 'M', stock: 5 },
+      { color: '#1c1917', size: 'L', stock: 4 },
+      { color: '#1c1917', size: 'XL', stock: 2 },
+      { color: '#e7e5e4', size: 'S', stock: 2 },
+      { color: '#e7e5e4', size: 'M', stock: 8 },
+      { color: '#e7e5e4', size: 'L', stock: 6 },
+      { color: '#e7e5e4', size: 'XL', stock: 3 },
+    ],
+    '3': [
+      { color: '#1c1917', size: 'S', stock: 6 },
+      { color: '#1c1917', size: 'M', stock: 9 },
+      { color: '#1c1917', size: 'L', stock: 5 },
+      { color: '#1c1917', size: 'XL', stock: 4 },
+      { color: '#e7e5e4', size: 'S', stock: 3 },
+      { color: '#e7e5e4', size: 'M', stock: 7 },
+      { color: '#e7e5e4', size: 'L', stock: 8 },
+      { color: '#e7e5e4', size: 'XL', stock: 2 },
+    ],
+    '4': [{ color: '#1c1917', stock: 12 }],
+  },
 
   placeOrder: async (price: bigint) => {
     set({ isPlacing: true })
@@ -129,12 +172,15 @@ export const useStore = create<Store>((set, get) => ({
         const response = await fetch(`${SERVER_URL}/orders?page=${page}`)
         if (!response.ok) throw new Error('failed to fetch orders')
         const ordersData = (await response.json()) as unknown[]
-        const orders = ordersData.map((order: Record<string, unknown>) => ({
-          ...order,
-          value: BigInt(order.value as string),
-          price: BigInt(order.price as string),
-          timestamp: BigInt(order.timestamp as string),
-        })) as Order[]
+        const orders = ordersData.map((order: unknown) => {
+          const orderRecord = order as Record<string, unknown>
+          return {
+            ...orderRecord,
+            value: BigInt(orderRecord.value as string),
+            price: BigInt(orderRecord.price as string),
+            timestamp: BigInt(orderRecord.timestamp as string),
+          }
+        }) as Order[]
 
         if (orders.length === 0) {
           hasMore = false
@@ -160,7 +206,7 @@ export const useStore = create<Store>((set, get) => ({
     get().syncOrders()
     const interval = setInterval(() => {
       get().syncOrders()
-    }, 10000)
+    }, 10_000)
 
     set({ syncInterval: interval })
   },
@@ -171,5 +217,9 @@ export const useStore = create<Store>((set, get) => ({
       clearInterval(syncInterval)
       set({ syncInterval: undefined })
     }
+  },
+
+  getInventory: (productId: string) => {
+    return get().inventory[productId] || []
   },
 }))
