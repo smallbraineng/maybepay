@@ -1,5 +1,6 @@
 import { Route, Router, useLocation } from 'wouter'
 import CheckoutPage from './components/CheckoutPage'
+import MaybePaySection from './components/MaybePaySection'
 import ProductGrid from './components/ProductGrid'
 import ProductPage from './components/ProductPage'
 import type { Product } from './config'
@@ -43,6 +44,8 @@ const HomePage = () => {
           </h1>
         </div>
       </div>
+
+      <MaybePaySection />
     </div>
   )
 }
