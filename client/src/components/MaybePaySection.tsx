@@ -21,7 +21,9 @@ const MaybePaySection = () => {
   const lastPercentageRef = useRef(30)
   const hoodiePrice = 80
   // Calculate correlated price based on slider percentage (10% = $90, 90% = $500)
-  const correlatedPrice = Math.round(90 + ((percentage - 10) / (90 - 10)) * (500 - 90))
+  const correlatedPrice = Math.round(
+    90 + ((percentage - 10) / (90 - 10)) * (500 - 90)
+  )
   const userPayAmount = Math.round((hoodiePrice * percentage) / 100)
   const overpayAmount = Math.round(correlatedPrice - hoodiePrice)
 
@@ -102,7 +104,10 @@ const MaybePaySection = () => {
       data: {
         label: (
           <div className="text-center">
-            <div className="text-stone-900 font-semibold" style={{ fontFamily: 'EB Garamond' }}>
+            <div
+              className="text-stone-900 font-semibold"
+              style={{ fontFamily: 'EB Garamond' }}
+            >
               Price You Chose
             </div>
             <div
@@ -129,23 +134,23 @@ const MaybePaySection = () => {
       id: '2',
       data: {
         label: (
-                      <div className="text-center">
-              <div
-                className="text-green-400 font-bold text-xl"
-                style={{ fontFamily: 'ui-monospace, monospace' }}
-              >
-                {percentage}%
-              </div>
-              <div className="text-base" style={{ fontFamily: 'EB Garamond' }}>
-                Free Hoodie
-              </div>
-              <div
-                className="text-sm text-stone-500 mt-1"
-                style={{ fontFamily: 'ui-monospace, monospace' }}
-              >
-                You Pay $0
-              </div>
+          <div className="text-center">
+            <div
+              className="text-green-400 font-bold text-xl"
+              style={{ fontFamily: 'ui-monospace, monospace' }}
+            >
+              {percentage}%
             </div>
+            <div className="text-base" style={{ fontFamily: 'EB Garamond' }}>
+              Free Hoodie
+            </div>
+            <div
+              className="text-sm text-stone-500 mt-1"
+              style={{ fontFamily: 'ui-monospace, monospace' }}
+            >
+              You Pay $0
+            </div>
+          </div>
         ),
       },
       position: { x: 150, y: 350 },
@@ -238,26 +243,26 @@ const MaybePaySection = () => {
             ...node,
             data: {
               label: (
-                                  <div className="text-center">
-                    <div
-                      className="text-green-400 font-bold text-xl"
-                      style={{ fontFamily: 'ui-monospace, monospace' }}
-                    >
-                      {percentage}%
-                    </div>
-                    <div
-                      className="text-base"
-                      style={{ fontFamily: 'EB Garamond' }}
-                    >
-                      Free Hoodie
-                    </div>
-                    <div
-                      className="text-sm text-stone-500 mt-1"
-                      style={{ fontFamily: 'ui-monospace, monospace' }}
-                    >
-                      You Pay $0
-                    </div>
+                <div className="text-center">
+                  <div
+                    className="text-green-400 font-bold text-xl"
+                    style={{ fontFamily: 'ui-monospace, monospace' }}
+                  >
+                    {percentage}%
                   </div>
+                  <div
+                    className="text-base"
+                    style={{ fontFamily: 'EB Garamond' }}
+                  >
+                    Free Hoodie
+                  </div>
+                  <div
+                    className="text-sm text-stone-500 mt-1"
+                    style={{ fontFamily: 'ui-monospace, monospace' }}
+                  >
+                    You Pay $0
+                  </div>
+                </div>
               ),
             },
           }
@@ -297,7 +302,10 @@ const MaybePaySection = () => {
             data: {
               label: (
                 <div className="text-center">
-                  <div className="text-stone-900 font-semibold" style={{ fontFamily: 'EB Garamond' }}>
+                  <div
+                    className="text-stone-900 font-semibold"
+                    style={{ fontFamily: 'EB Garamond' }}
+                  >
                     Price You Chose
                   </div>
                   <div
@@ -314,7 +322,7 @@ const MaybePaySection = () => {
         return node
       })
     )
-  }, [percentage, setNodes, userPayAmount, overpayAmount, correlatedPrice])
+  }, [percentage, setNodes, overpayAmount, correlatedPrice])
 
   return (
     <div className="w-full pt-12 pb-0 px-6 mb-4">
@@ -336,8 +344,7 @@ const MaybePaySection = () => {
 
             <div className="text-stone-700 text-lg leading-relaxed mb-8">
               <p className="mb-4" style={{ fontFamily: 'EB Garamond' }}>
-                Set your odds. higher price  = higher chance of getting it
-                free.
+                Set your odds. higher price = higher chance of getting it free.
               </p>
               <p className="mb-4" style={{ fontFamily: 'EB Garamond' }}>
                 Don't get it free? You overpay.

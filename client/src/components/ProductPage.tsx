@@ -210,7 +210,8 @@ const ProductPage = memo(() => {
               >
                 {currentStock === 0 &&
                 selectedColor &&
-                (!hasSizes && !selectedSize)
+                !hasSizes &&
+                !selectedSize
                   ? 'Out of Stock'
                   : `Buy Now - $${product.price}`}
               </button>

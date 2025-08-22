@@ -28,9 +28,7 @@ const HomePage = () => {
 
       {/* CHOOSE MAYBE PAY Header */}
       <div className="w-full bg-stone-200 px-6 py-2 rounded-t-lg text-center">
-        <h2 
-          className="text-sm text-stone-900 tracking-wider uppercase"
-        >
+        <h2 className="text-sm text-stone-900 tracking-wider uppercase">
           CHOOSE MAYBE PAY
         </h2>
       </div>

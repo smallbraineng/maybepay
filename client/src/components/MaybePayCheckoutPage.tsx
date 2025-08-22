@@ -157,7 +157,9 @@ const MaybePayCheckoutPage = memo(() => {
   const [percentage, setPercentage] = useState(30)
   const [customPrice, setCustomPrice] = useState('')
   const hoodiePrice = 80
-  const correlatedPrice = Math.round(90 + ((percentage - 10) / (90 - 10)) * (500 - 90))
+  const correlatedPrice = Math.round(
+    90 + ((percentage - 10) / (90 - 10)) * (500 - 90)
+  )
 
   useEffect(() => {
     const subscription = searchSubject.current
@@ -192,7 +194,9 @@ const MaybePayCheckoutPage = memo(() => {
     quantity: 1,
   }
   const shipping = address.country === 'US' ? 5 : 10
-  const subtotal = customPrice ? parseFloat(customPrice) : correlatedPrice
+  const subtotal = customPrice
+    ? Number.parseFloat(customPrice)
+    : correlatedPrice
   const total = subtotal + shipping
 
   const handleAddressSelect = (suggestion: AddressSuggestion) => {
@@ -213,7 +217,13 @@ const MaybePayCheckoutPage = memo(() => {
 
   const handleBack = () => setLocation(`/product/${productId}`)
   const handlePay = () =>
-    console.log('MaybePay processing...', { orderItem, address, total, percentage, customPrice })
+    console.log('MaybePay processing...', {
+      orderItem,
+      address,
+      total,
+      percentage,
+      customPrice,
+    })
 
   if (!product) {
     return <div>Product not found</div>
@@ -246,72 +256,87 @@ const MaybePayCheckoutPage = memo(() => {
               <h2 className="text-xl font-medium text-stone-900 mb-6">
                 Choose Your Price
               </h2>
-              
+
               <div className="space-y-6">
                 {/* Slider Section */}
-                                 <div>
-                   <label className="block text-sm font-medium text-stone-700 mb-4">
-                     Adjust your odds: <span className="font-mono">{percentage}%</span>
-                   </label>
-                   <div className="relative w-full h-3 bg-stone-300 rounded-full">
-                     <div
-                       className="h-full bg-stone-900 rounded-full transition-all duration-200"
-                       style={{
-                         width: `${((percentage - 10) / (90 - 10)) * 100}%`,
-                       }}
-                     />
-                     <div
-                       className="absolute top-1/2 w-5 h-5 bg-stone-900 border-2 border-white rounded-full shadow-lg cursor-grab select-none"
-                       style={{
-                         left: `calc(${((percentage - 10) / (90 - 10)) * 100}% - 10px)`,
-                         transform: 'translateY(-50%)',
-                       }}
-                     />
-                     <input
-                       type="range"
-                       min="10"
-                       max="90"
-                       value={percentage}
-                       onChange={(e) => setPercentage(parseInt(e.target.value))}
-                       className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
-                     />
-                   </div>
-                   <div className="flex justify-between text-xs text-stone-600 mt-2">
-                     <span>10% - $90</span>
-                     <span>90% - $500</span>
-                   </div>
-                 </div>
+                <div>
+                  <label
+                    htmlFor="odds-slider"
+                    className="block text-sm font-medium text-stone-700 mb-4"
+                  >
+                    Adjust your odds:{' '}
+                    <span className="font-mono">{percentage}%</span>
+                  </label>
+                  <div className="relative w-full h-3 bg-stone-300 rounded-full">
+                    <div
+                      className="h-full bg-stone-900 rounded-full transition-all duration-200"
+                      style={{
+                        width: `${((percentage - 10) / (90 - 10)) * 100}%`,
+                      }}
+                    />
+                    <div
+                      className="absolute top-1/2 w-5 h-5 bg-stone-900 border-2 border-white rounded-full shadow-lg cursor-grab select-none"
+                      style={{
+                        left: `calc(${((percentage - 10) / (90 - 10)) * 100}% - 10px)`,
+                        transform: 'translateY(-50%)',
+                      }}
+                    />
+                    <input
+                      id="odds-slider"
+                      type="range"
+                      min="10"
+                      max="90"
+                      value={percentage}
+                      onChange={(e) =>
+                        setPercentage(Number.parseInt(e.target.value))
+                      }
+                      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                    />
+                  </div>
+                  <div className="flex justify-between text-xs text-stone-600 mt-2">
+                    <span>10% - $90</span>
+                    <span>90% - $500</span>
+                  </div>
+                </div>
 
                 {/* Price Display and Custom Input */}
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                    <div className="block text-sm font-medium text-stone-700 mb-2">
                       Suggested Price
-                    </label>
+                    </div>
                     <div className="text-2xl font-bold text-stone-900">
                       ${correlatedPrice}
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-stone-700 mb-2">
+                    <label
+                      htmlFor="custom-price"
+                      className="block text-sm font-medium text-stone-700 mb-2"
+                    >
                       Custom Price
                     </label>
-                                         <input
-                       type="number"
-                       min="90"
-                       max="500"
-                       value={customPrice}
-                       onChange={(e) => setCustomPrice(e.target.value)}
-                       className="w-full px-3 py-2 border border-stone-300 text-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-900 rounded"
-                       placeholder="Enter your own price"
-                     />
+                    <input
+                      id="custom-price"
+                      type="number"
+                      min="90"
+                      max="500"
+                      value={customPrice}
+                      onChange={(e) => setCustomPrice(e.target.value)}
+                      className="w-full px-3 py-2 border border-stone-300 text-stone-900 focus:outline-none focus:ring-1 focus:ring-stone-900 rounded"
+                      placeholder="Enter your own price"
+                    />
                   </div>
                 </div>
 
                 {/* Odds Display */}
                 <div className="text-center p-4 bg-white rounded border border-stone-200">
-                  <div className="text-sm text-stone-600 mb-1">Your odds of getting it FREE:</div>
-                  <div className="text-2xl font-bold text-green-600">{percentage}%</div>
+                  <div className="text-sm text-stone-600 mb-1">
+                    Your odds of getting it FREE:
+                  </div>
+                  <div className="text-2xl font-bold text-green-600">
+                    {percentage}%
+                  </div>
                   <div className="text-sm text-stone-500">
                     {100 - percentage}% chance you overpay
                   </div>

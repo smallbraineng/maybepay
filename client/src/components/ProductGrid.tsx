@@ -18,7 +18,7 @@ const ProductGrid = ({
           </div>
         </div>
         <div className="flex items-center justify-between">
-          <h2 
+          <h2
             className="text-3xl md:text-4xl lg:text-5xl font-bold text-stone-900 tracking-tight"
             style={{ fontFamily: 'EB Garamond' }}
           >
@@ -26,7 +26,7 @@ const ProductGrid = ({
           </h2>
         </div>
         <div className="flex items-center justify-between">
-          <h3 
+          <h3
             className="text-2xl md:text-3xl lg:text-4xl font-bold text-stone-700 tracking-tight"
             style={{ fontFamily: 'EB Garamond' }}
           >
