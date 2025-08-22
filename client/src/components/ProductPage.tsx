@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from 'react'
+import { memo, useCallback, useEffect, useMemo, useState } from 'react'
 import { useLocation, useParams } from 'wouter'
 import { products } from '../config'
 import { useStore } from '../store'
@@ -14,6 +14,7 @@ const ProductPage = memo(() => {
 
   const [selectedColor, setSelectedColor] = useState('')
   const [selectedSize, setSelectedSize] = useState('')
+  const [showError, setShowError] = useState(false)
 
   const colorOptions = useMemo(() => {
     const colors = [...new Set(inventory.map((item) => item.color))]
@@ -57,12 +58,35 @@ const ProductPage = memo(() => {
   )
 
   const handleOrder = useCallback(() => {
-    if (!product || !selectedColor) return
+    if (!product || !selectedColor || (hasSizes && !selectedSize)) {
+      setShowError(true)
+      return
+    }
+    setShowError(false)
     const checkoutPath = selectedSize
       ? `/checkout/${product.id}/${encodeURIComponent(selectedColor)}/${encodeURIComponent(selectedSize)}`
       : `/checkout/${product.id}/${encodeURIComponent(selectedColor)}`
     setLocation(checkoutPath)
-  }, [product, selectedColor, selectedSize, setLocation])
+  }, [product, selectedColor, selectedSize, setLocation, hasSizes])
+
+  const handleMaybePay = useCallback(() => {
+    if (!product || !selectedColor || (hasSizes && !selectedSize)) {
+      setShowError(true)
+      return
+    }
+    setShowError(false)
+    const checkoutPath = selectedSize
+      ? `/maybepay/${product.id}/${encodeURIComponent(selectedColor)}/${encodeURIComponent(selectedSize)}`
+      : `/maybepay/${product.id}/${encodeURIComponent(selectedColor)}`
+    setLocation(checkoutPath)
+  }, [product, selectedColor, selectedSize, setLocation, hasSizes])
+
+  // Hide error message when user selects both color and size
+  useEffect(() => {
+    if (selectedColor && (!hasSizes || selectedSize)) {
+      setShowError(false)
+    }
+  }, [selectedColor, selectedSize, hasSizes])
 
   const handleBack = useCallback(() => {
     setLocation('/')
@@ -178,29 +202,35 @@ const ProductPage = memo(() => {
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={handleOrder}
-              disabled={
-                !selectedColor ||
-                (hasSizes && !selectedSize) ||
-                currentStock === 0
-              }
-              className="w-full bg-stone-900 text-white py-4 px-8 text-xl font-medium hover:bg-stone-800 transition-colors disabled:bg-stone-400 disabled:cursor-not-allowed"
-              title={
-                !selectedColor || (hasSizes && !selectedSize)
-                  ? `Please select ${!selectedColor ? 'color' : ''}${!selectedColor && hasSizes && !selectedSize ? ' and ' : ''}${hasSizes && !selectedSize ? 'size' : ''}`
-                  : currentStock === 0
-                    ? 'Out of stock'
-                    : ''
-              }
-            >
-              {currentStock === 0 &&
-              selectedColor &&
-              (!hasSizes || selectedSize)
-                ? 'Out of Stock'
-                : `Buy Now - $${product.price}`}
-            </button>
+            <div className="space-y-3">
+              <button
+                type="button"
+                onClick={handleOrder}
+                className="w-full bg-stone-900 text-white py-4 px-8 text-xl font-medium hover:bg-stone-800 transition-colors"
+              >
+                {currentStock === 0 &&
+                selectedColor &&
+                (!hasSizes && !selectedSize)
+                  ? 'Out of Stock'
+                  : `Buy Now - $${product.price}`}
+              </button>
+
+              {/* Maybe Pay Button */}
+              <button
+                type="button"
+                onClick={handleMaybePay}
+                className="w-full bg-stone-200 text-stone-900 py-3 px-8 text-lg font-medium hover:bg-stone-300 transition-colors border border-stone-300"
+              >
+                Maybe Pay
+              </button>
+
+              {/* Error Message */}
+              {showError && (
+                <div className="text-red-600 text-sm text-center py-2">
+                  Please select color{hasSizes ? ' and size' : ''}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
