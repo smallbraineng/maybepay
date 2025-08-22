@@ -20,8 +20,12 @@ const MaybePaySection = () => {
   const sliderRef = useRef<HTMLDivElement>(null)
   const lastPercentageRef = useRef(30)
   const hoodiePrice = 80
+  // Calculate correlated price based on slider percentage (10% = $90, 90% = $500)
+  const correlatedPrice = Math.round(
+    90 + ((percentage - 10) / (90 - 10)) * (500 - 90)
+  )
   const userPayAmount = Math.round((hoodiePrice * percentage) / 100)
-  const overpayAmount = Math.round(hoodiePrice + hoodiePrice * 0.5)
+  const overpayAmount = Math.round(correlatedPrice - hoodiePrice)
 
   const createParticle = useCallback((thumbPositionPercent: number) => {
     if (sliderRef.current) {
@@ -64,9 +68,9 @@ const MaybePaySection = () => {
           <div className="text-center">
             <div className="mb-2">
               <img
-                src="/api/placeholder/60/60"
+                src="/assets/test-hoodie.png"
                 alt="Hoodie"
-                className="w-12 h-12 mx-auto rounded"
+                className="w-12 h-12 mx-auto rounded object-cover"
               />
             </div>
             <div
@@ -84,16 +88,47 @@ const MaybePaySection = () => {
           </div>
         ),
       },
-      position: { x: 250, y: 25 },
+      position: { x: 300, y: 70 },
       style: {
         background: 'transparent',
         border: '1px solid #d6d3d1',
         borderRadius: '12px',
-        fontSize: '14px',
+        fontSize: '16px',
+        padding: '20px',
+        width: '180px',
+      },
+      draggable: false,
+    },
+    {
+      id: '4',
+      data: {
+        label: (
+          <div className="text-center">
+            <div
+              className="text-stone-900 font-semibold"
+              style={{ fontFamily: 'EB Garamond' }}
+            >
+              Price You Chose
+            </div>
+            <div
+              className="text-stone-600 font-bold text-lg mt-1"
+              style={{ fontFamily: 'ui-monospace, monospace' }}
+            >
+              You Pay ${correlatedPrice}
+            </div>
+          </div>
+        ),
+      },
+      position: { x: 320, y: 235 },
+      style: {
+        background: '#fafaf9',
+        border: '1px solid #e7e5e4',
+        borderRadius: '12px',
+        fontSize: '12px',
         padding: '16px',
         width: '140px',
-        textAlign: 'center',
       },
+      draggable: false,
     },
     {
       id: '2',
@@ -101,33 +136,33 @@ const MaybePaySection = () => {
         label: (
           <div className="text-center">
             <div
-              className="text-green-400 font-bold text-lg"
+              className="text-green-400 font-bold text-xl"
               style={{ fontFamily: 'ui-monospace, monospace' }}
             >
               {percentage}%
             </div>
-            <div className="text-sm" style={{ fontFamily: 'EB Garamond' }}>
-              Get FREE
+            <div className="text-base" style={{ fontFamily: 'EB Garamond' }}>
+              Free Hoodie
             </div>
             <div
-              className="text-xs text-stone-500 mt-1"
+              className="text-sm text-stone-500 mt-1"
               style={{ fontFamily: 'ui-monospace, monospace' }}
             >
-              You pay ${userPayAmount}
+              You Pay $0
             </div>
           </div>
         ),
       },
-      position: { x: 150, y: 180 },
+      position: { x: 150, y: 350 },
       style: {
         background: '#f0fdf4',
         border: '1px solid #bbf7d0',
         borderRadius: '12px',
-        fontSize: '12px',
-        padding: '16px',
-        width: '120px',
-        textAlign: 'center',
+        fontSize: '14px',
+        padding: '20px',
+        width: '160px',
       },
+      draggable: false,
     },
     {
       id: '3',
@@ -135,48 +170,56 @@ const MaybePaySection = () => {
         label: (
           <div className="text-center">
             <div
-              className="text-red-400 font-bold text-lg"
+              className="text-red-400 font-bold text-xl"
               style={{ fontFamily: 'ui-monospace, monospace' }}
             >
               {100 - percentage}%
             </div>
-            <div className="text-sm" style={{ fontFamily: 'EB Garamond' }}>
-              You overpay
+            <div className="text-base" style={{ fontFamily: 'EB Garamond' }}>
+              You overpay by
             </div>
             <div
-              className="text-xs text-stone-500 mt-1"
+              className="text-sm text-stone-500 mt-1"
               style={{ fontFamily: 'ui-monospace, monospace' }}
             >
-              Pay ${overpayAmount}
+              ${overpayAmount}
             </div>
           </div>
         ),
       },
-      position: { x: 350, y: 180 },
+      position: { x: 450, y: 350 },
       style: {
         background: '#fef2f2',
         border: '1px solid #fecaca',
         borderRadius: '12px',
-        fontSize: '12px',
-        padding: '16px',
-        width: '120px',
-        textAlign: 'center',
+        fontSize: '14px',
+        padding: '20px',
+        width: '160px',
       },
+      draggable: false,
     },
   ]
 
   const initialEdges = [
     {
-      id: 'e1-2',
+      id: 'e1-4',
       source: '1',
+      target: '4',
+      animated: true,
+      style: { stroke: '#d6d3d1', strokeWidth: 1.5 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#d6d3d1' },
+    },
+    {
+      id: 'e4-2',
+      source: '4',
       target: '2',
       animated: true,
       style: { stroke: '#86efac', strokeWidth: 1.5 },
       markerEnd: { type: MarkerType.ArrowClosed, color: '#86efac' },
     },
     {
-      id: 'e1-3',
-      source: '1',
+      id: 'e4-3',
+      source: '4',
       target: '3',
       animated: true,
       style: { stroke: '#fca5a5', strokeWidth: 1.5 },
@@ -202,22 +245,22 @@ const MaybePaySection = () => {
               label: (
                 <div className="text-center">
                   <div
-                    className="text-green-400 font-bold text-lg"
+                    className="text-green-400 font-bold text-xl"
                     style={{ fontFamily: 'ui-monospace, monospace' }}
                   >
                     {percentage}%
                   </div>
                   <div
-                    className="text-sm"
+                    className="text-base"
                     style={{ fontFamily: 'EB Garamond' }}
                   >
-                    Get FREE
+                    Free Hoodie
                   </div>
                   <div
-                    className="text-xs text-stone-500 mt-1"
+                    className="text-sm text-stone-500 mt-1"
                     style={{ fontFamily: 'ui-monospace, monospace' }}
                   >
-                    You pay ${userPayAmount}
+                    You Pay $0
                   </div>
                 </div>
               ),
@@ -231,22 +274,45 @@ const MaybePaySection = () => {
               label: (
                 <div className="text-center">
                   <div
-                    className="text-red-400 font-bold text-lg"
+                    className="text-red-400 font-bold text-xl"
                     style={{ fontFamily: 'ui-monospace, monospace' }}
                   >
                     {100 - percentage}%
                   </div>
                   <div
-                    className="text-sm"
+                    className="text-base"
                     style={{ fontFamily: 'EB Garamond' }}
                   >
-                    You overpay
+                    You overpay by
                   </div>
                   <div
-                    className="text-xs text-stone-500 mt-1"
+                    className="text-sm text-stone-500 mt-1"
                     style={{ fontFamily: 'ui-monospace, monospace' }}
                   >
-                    Pay ${overpayAmount}
+                    ${overpayAmount}
+                  </div>
+                </div>
+              ),
+            },
+          }
+        }
+        if (node.id === '4') {
+          return {
+            ...node,
+            data: {
+              label: (
+                <div className="text-center">
+                  <div
+                    className="text-stone-900 font-semibold"
+                    style={{ fontFamily: 'EB Garamond' }}
+                  >
+                    Price You Chose
+                  </div>
+                  <div
+                    className="text-stone-600 font-bold text-sm mt-1"
+                    style={{ fontFamily: 'ui-monospace, monospace' }}
+                  >
+                    You Pay ${correlatedPrice}
                   </div>
                 </div>
               ),
@@ -256,10 +322,10 @@ const MaybePaySection = () => {
         return node
       })
     )
-  }, [percentage, setNodes, userPayAmount, overpayAmount])
+  }, [percentage, setNodes, overpayAmount, correlatedPrice])
 
   return (
-    <div className="w-full py-16 px-6">
+    <div className="w-full pt-12 pb-0 px-6 mb-4">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row lg:items-start lg:gap-16">
           <div className="lg:w-1/2 lg:order-1 order-2">
@@ -278,8 +344,7 @@ const MaybePaySection = () => {
 
             <div className="text-stone-700 text-lg leading-relaxed mb-8">
               <p className="mb-4" style={{ fontFamily: 'EB Garamond' }}>
-                Set your odds. Higher payment = higher chance of getting it
-                free.
+                Set your odds. higher price = higher chance of getting it free.
               </p>
               <p className="mb-4" style={{ fontFamily: 'EB Garamond' }}>
                 Don't get it free? You overpay.
@@ -398,7 +463,7 @@ const MaybePaySection = () => {
           </div>
 
           <div className="lg:w-1/2 lg:order-2 order-1 mb-8 lg:mb-0">
-            <div style={{ width: '100%', height: '400px' }}>
+            <div style={{ width: '100%', height: '450px' }}>
               <ReactFlow
                 nodes={nodes}
                 edges={edges}
@@ -409,6 +474,12 @@ const MaybePaySection = () => {
                 fitView
                 attributionPosition="bottom-left"
                 proOptions={{ hideAttribution: true }}
+                panOnScroll={false}
+                zoomOnScroll={false}
+                panOnDrag={false}
+                zoomOnPinch={false}
+                zoomOnDoubleClick={false}
+                preventScrolling={true}
               />
             </div>
           </div>
