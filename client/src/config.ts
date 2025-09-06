@@ -15,7 +15,7 @@ export const products: Product[] = [
     id: '1',
     title: 'Hoodie',
     price: 60,
-    image: '/assets/test-hoodie.png',
+    image: '/assets/whitehoodie1.png',
     description:
       'A timeless white t-shirt made from premium organic cotton. Perfect for any occasion.',
     reviews: [
