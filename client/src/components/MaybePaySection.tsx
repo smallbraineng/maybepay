@@ -68,7 +68,7 @@ const MaybePaySection = () => {
           <div className="text-center">
             <div className="mb-2">
               <img
-                src="/assets/test-hoodie.png"
+                src="/assets/whitehoodie1.png"
                 alt="Hoodie"
                 className="w-12 h-12 mx-auto rounded object-cover"
               />

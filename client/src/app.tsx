@@ -17,12 +17,61 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col m-6">
       <header
-        className="flex tracking-tight justify-between text-xs md:text-base lg:text-md bg-stone-200 px-6 py-4 rounded-lg mb-16"
-        style={{ fontFamily: 'EB Garamond' }}
+        className="flex tracking-tight justify-between text-sm md:text-lg lg:text-xl bg-white px-6 py-2 rounded-lg mb-8"
+        style={{ fontFamily: 'Inter, sans-serif' }}
       >
-        <h1 className="text-stone-900">Small Brain Engineering, Inc.</h1>
+        <div className="flex items-center gap-3">
+          <img
+            src="/assets/small brain logo.png"
+            alt="Think Small Brain Logo"
+            className="w-8 h-8 -mt-0.5"
+          />
+          <h1 className="text-stone-900">Small Brain Engineering, Inc.</h1>
+        </div>
         <h1 className="text-stone-900">Limited Release of 50</h1>
       </header>
+
+      {/* Top Product Grid */}
+      <div className="mb-8 bg-stone-50 py-8 px-6 rounded-lg">
+        <div className="text-center mb-4">
+          <div className="text-sm text-stone-500 tracking-wider uppercase" style={{ fontFamily: 'Inter, sans-serif' }}>
+            FEATURED
+          </div>
+        </div>
+
+        <div className="mx-auto grid w-full max-w-2xl grid-cols-2 md:grid-cols-4 gap-2">
+          {products.slice(0, 4).map((product) => (
+            <div
+              key={product.id}
+              className="cursor-pointer flex gap-1 flex-col items-center border-none bg-transparent p-0"
+              onClick={() => handleProductClick(product)}
+            >
+              <img
+                src={product.image}
+                alt={product.title}
+                className="w-full aspect-square object-cover rounded-lg"
+              />
+              <div className="flex items-center gap-1">
+                <h3
+                  className="text-stone-900 tracking-tight text-xs"
+                  style={{ fontFamily: 'EB Garamond' }}
+                >
+                  {product.title}
+                </h3>
+                <div className="flex gap-0.5">
+                  {product.colors.slice(0, 2).map((color) => (
+                    <div
+                      key={color}
+                      className="w-1.5 h-1.5"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
 
       <MaybePaySection />
 
