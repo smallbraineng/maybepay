@@ -17,8 +17,12 @@ const MaybePaySection = () => {
   const [particles, setParticles] = useState<
     { id: number; x: number; y: number }[]
   >([])
+  const [scrambledWord, setScrambledWord] = useState('later')
+  const [isAnimating, setIsAnimating] = useState(false)
+  const [hasAnimated, setHasAnimated] = useState(false)
   const sliderRef = useRef<HTMLDivElement>(null)
   const lastPercentageRef = useRef(30)
+  const sectionRef = useRef<HTMLDivElement>(null)
   const hoodiePrice = 80
   // Calculate correlated price based on slider percentage (10% = $90, 90% = $500)
   const correlatedPrice = Math.round(
@@ -26,6 +30,76 @@ const MaybePaySection = () => {
   )
   const userPayAmount = Math.round((hoodiePrice * percentage) / 100)
   const overpayAmount = Math.round(correlatedPrice - hoodiePrice)
+
+  // Animation trigger function
+  const triggerAnimation = useCallback(() => {
+    if (hasAnimated) return
+    
+    setHasAnimated(true)
+    setIsAnimating(true)
+    
+    // Start with "later" and backspace to "maybe"
+    const startWord = 'later'
+    const targetWord = 'maybe'
+    
+    // First backspace from "later" to empty
+    let currentWord = startWord
+    let step = 0
+    
+    const backspaceInterval = setInterval(() => {
+      if (step < startWord.length) {
+        // Backspace one character at a time
+        currentWord = startWord.slice(0, startWord.length - step - 1)
+        setScrambledWord(currentWord)
+        step++
+      } else if (step < startWord.length + targetWord.length) {
+        // Type "maybe" one character at a time
+        const typeIndex = step - startWord.length
+        currentWord = targetWord.slice(0, typeIndex + 1)
+        setScrambledWord(currentWord)
+        step++
+      } else {
+        // Animation complete
+        clearInterval(backspaceInterval)
+        setIsAnimating(false)
+      }
+    }, 150) // Change every 150ms for smooth typing effect
+  }, [hasAnimated])
+
+  // Intersection observer to trigger animation when section comes into view
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            // Small delay when scrolling into view
+            setTimeout(() => {
+              triggerAnimation()
+            }, 500)
+          }
+        })
+      },
+      { threshold: 0.3 } // Trigger when 30% of section is visible
+    )
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current)
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current)
+      }
+    }
+  }, [triggerAnimation, hasAnimated])
+
+  // Expose trigger function globally for button click
+  useEffect(() => {
+    (window as any).triggerMaybePayAnimation = triggerAnimation
+    return () => {
+      delete (window as any).triggerMaybePayAnimation
+    }
+  }, [triggerAnimation])
 
   const createParticle = useCallback((thumbPositionPercent: number) => {
     if (sliderRef.current) {
@@ -74,7 +148,7 @@ const MaybePaySection = () => {
               />
             </div>
             <div
-              style={{ fontFamily: 'EB Garamond' }}
+              style={{ fontFamily: 'Inter, sans-serif' }}
               className="text-stone-900"
             >
               Hoodie
@@ -106,7 +180,7 @@ const MaybePaySection = () => {
           <div className="text-center">
             <div
               className="text-stone-900 font-semibold"
-              style={{ fontFamily: 'EB Garamond' }}
+              style={{ fontFamily: 'Inter, sans-serif' }}
             >
               Price You Chose
             </div>
@@ -141,7 +215,7 @@ const MaybePaySection = () => {
             >
               {percentage}%
             </div>
-            <div className="text-base" style={{ fontFamily: 'EB Garamond' }}>
+            <div className="text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
               Free Hoodie
             </div>
             <div
@@ -175,7 +249,7 @@ const MaybePaySection = () => {
             >
               {100 - percentage}%
             </div>
-            <div className="text-base" style={{ fontFamily: 'EB Garamond' }}>
+            <div className="text-base" style={{ fontFamily: 'Inter, sans-serif' }}>
               You overpay by
             </div>
             <div
@@ -252,7 +326,7 @@ const MaybePaySection = () => {
                   </div>
                   <div
                     className="text-base"
-                    style={{ fontFamily: 'EB Garamond' }}
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     Free Hoodie
                   </div>
@@ -281,7 +355,7 @@ const MaybePaySection = () => {
                   </div>
                   <div
                     className="text-base"
-                    style={{ fontFamily: 'EB Garamond' }}
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     You overpay by
                   </div>
@@ -304,7 +378,7 @@ const MaybePaySection = () => {
                 <div className="text-center">
                   <div
                     className="text-stone-900 font-semibold"
-                    style={{ fontFamily: 'EB Garamond' }}
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     Price You Chose
                   </div>
@@ -325,33 +399,38 @@ const MaybePaySection = () => {
   }, [percentage, setNodes, overpayAmount, correlatedPrice])
 
   return (
-    <div className="w-full pt-12 pb-0 px-6 mb-4">
+    <div ref={sectionRef} className="w-full pt-12 pb-0 px-6 mb-4">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col lg:flex-row lg:items-start lg:gap-16">
           <div className="lg:w-1/2 lg:order-1 order-2">
             <h2
               className="text-lg md:text-xl text-stone-600 mb-4"
-              style={{ fontFamily: 'EB Garamond' }}
+              style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              introducing a new way to pay
+              Introducing,
             </h2>
             <h1
               className="text-4xl md:text-6xl lg:text-7xl font-bold text-stone-900 mb-8"
-              style={{ fontFamily: 'EB Garamond' }}
+              style={{ fontFamily: 'Inter, sans-serif' }}
             >
-              buy now, pay maybe.
+              buy now,
+              <br />
+              pay {scrambledWord}.
             </h1>
 
             <div className="text-stone-700 text-lg leading-relaxed mb-8">
-              <p className="mb-4" style={{ fontFamily: 'EB Garamond' }}>
-                Set your odds. higher price = higher chance of getting it free.
+              <p className="mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Why pay MSRP when you could pay nothing?
               </p>
-              <p className="mb-4" style={{ fontFamily: 'EB Garamond' }}>
+              <p className="mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
+                Set your odds. A higher price = higher chance at free exclusive merch.
+              </p>
+              <p className="mb-4" style={{ fontFamily: 'Inter, sans-serif' }}>
                 Don't get it free? You overpay.
               </p>
               <p
                 className="text-stone-600"
-                style={{ fontFamily: 'EB Garamond' }}
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 Choose "maybe pay" at checkout.
               </p>
@@ -361,7 +440,7 @@ const MaybePaySection = () => {
               <label
                 htmlFor="odds-slider"
                 className="block text-sm font-medium text-stone-700 mb-4"
-                style={{ fontFamily: 'EB Garamond' }}
+                style={{ fontFamily: 'Inter, sans-serif' }}
               >
                 Adjust your odds:{' '}
                 <span style={{ fontFamily: 'ui-monospace, monospace' }}>

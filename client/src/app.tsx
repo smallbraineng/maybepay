@@ -17,7 +17,7 @@ const HomePage = () => {
   return (
     <div className="min-h-screen bg-white flex flex-col m-6">
       <header
-        className="flex tracking-tight justify-between text-sm md:text-lg lg:text-xl bg-white px-6 py-2 rounded-lg mb-8"
+        className="flex tracking-tight justify-between text-sm md:text-lg lg:text-xl bg-white px-6 py-0.5 rounded-lg mb-8"
         style={{ fontFamily: 'Inter, sans-serif' }}
       >
         <div className="flex items-center gap-3">
@@ -32,9 +32,12 @@ const HomePage = () => {
       </header>
 
       {/* Top Product Grid */}
-      <div className="mb-8 bg-stone-50 py-8 px-6 rounded-lg">
-        <div className="text-center mb-4">
-          <div className="text-sm text-stone-500 tracking-wider uppercase" style={{ fontFamily: 'Inter, sans-serif' }}>
+      <div className="mb-8 bg-stone-100 py-4 px-6 rounded-lg relative overflow-hidden">
+        <div className="text-center mb-2">
+          <div
+            className="text-sm text-stone-500 tracking-wider uppercase"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
             FEATURED
           </div>
         </div>
@@ -71,33 +74,73 @@ const HomePage = () => {
             </div>
           ))}
         </div>
+
+        {/* Fortune Favors the Bold Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div
+            className="text-2xl md:text-4xl lg:text-6xl font-black text-stone-900 tracking-wider uppercase opacity-0 whitespace-nowrap text-center"
+            style={{ fontFamily: 'Inter, sans-serif', animation: 'fortuneFlash 8s infinite' }}
+          >
+            FORTUNE FAVORS THE BOLD
+          </div>
+          <div
+            className="text-2xl md:text-4xl lg:text-6xl font-black text-stone-900 tracking-wider uppercase opacity-0 whitespace-nowrap text-center absolute"
+            style={{ fontFamily: 'Inter, sans-serif', animation: 'chooseMaybePay 8s infinite' }}
+          >
+            CHOOSE MAYBE PAY
+          </div>
+        </div>
       </div>
 
-      <MaybePaySection />
-
-      {/* CHOOSE MAYBE PAY Header */}
-      <div className="w-full bg-stone-200 px-6 py-2 rounded-t-lg text-center">
-        <h2 className="text-sm text-stone-900 tracking-wider uppercase">
-          CHOOSE MAYBE PAY
-        </h2>
-      </div>
-
-      <div className="w-full relative">
+      {/* Main Hero Image */}
+      <div className="w-full relative -mt-8">
         <img
           src="/assets/main.jpg"
           alt="Main background"
-          className="w-full h-full object-cover rounded-b-xl lg:h-128"
+          className="w-full h-full object-cover rounded-xl lg:h-128"
         />
         <div className="absolute right-6 bottom-6 text-end text-stone-100">
           <h1
             className="text-2xl md:text-3xl lg:text-6xl tracking-tighter"
-            style={{
-              fontFamily: 'EB Garamond',
-            }}
+            style={{ fontFamily: 'EB Garamond' }}
           >
             Think Small Brain.
           </h1>
         </div>
+
+        {/* Bottom Left Overlay */}
+        <div className="absolute left-6 bottom-6 text-stone-100">
+          <p
+            className="text-lg md:text-xl lg:text-2xl mb-4"
+            style={{ fontFamily: 'Inter, sans-serif' }}
+          >
+            Want one of these hoodies for free?
+          </p>
+          <button
+            onClick={() => {
+              const maybePaySection = document.getElementById('maybe-pay-section')
+              maybePaySection?.scrollIntoView({ behavior: 'smooth' })
+              setTimeout(() => {
+                if ((window as any).triggerMaybePayAnimation) {
+                  (window as any).triggerMaybePayAnimation()
+                }
+              }, 1000)
+            }}
+            className="border-2 border-stone-100 px-4 py-2 rounded-lg inline-block hover:bg-stone-100 hover:text-stone-900 transition-colors cursor-pointer"
+          >
+            <span
+              className="text-sm md:text-base lg:text-lg font-semibold tracking-wider uppercase"
+              style={{ fontFamily: 'Inter, sans-serif' }}
+            >
+              Maybe Pay
+            </span>
+          </button>
+        </div>
+      </div>
+
+      {/* Maybe Pay Section */}
+      <div id="maybe-pay-section">
+        <MaybePaySection />
       </div>
 
       <main className="p-6">
@@ -112,14 +155,8 @@ const App = () => {
     <Router>
       <Route path="/" component={HomePage} />
       <Route path="/product/:id" component={ProductPage} />
-      <Route
-        path="/checkout/:productId/:color/:size?"
-        component={CheckoutPage}
-      />
-      <Route
-        path="/maybepay/:productId/:color/:size?"
-        component={MaybePayCheckoutPage}
-      />
+      <Route path="/checkout/:productId/:color/:size?" component={CheckoutPage} />
+      <Route path="/maybepay/:productId/:color/:size?" component={MaybePayCheckoutPage} />
     </Router>
   )
 }
