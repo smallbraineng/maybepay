@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useRef, useState } from 'react'
 import {
   Subject,
   debounceTime,
@@ -6,6 +6,7 @@ import {
   of,
   switchMap,
 } from 'rxjs'
+import { motion } from 'framer-motion'
 import { useLocation, useParams } from 'wouter'
 import { products } from '../config'
 import { useStore } from '../store'
@@ -156,6 +157,9 @@ const MaybePayCheckoutPage = memo(() => {
   // MaybePay specific state
   const [percentage, setPercentage] = useState(30)
   const [customPrice, setCustomPrice] = useState('')
+  const [isDragging, setIsDragging] = useState(false)
+  const sliderRef = useRef<HTMLDivElement>(null)
+  const lastPercentageRef = useRef(30)
   const hoodiePrice = 80
   const correlatedPrice = Math.round(
     90 + ((percentage - 10) / (90 - 10)) * (500 - 90)
@@ -180,6 +184,17 @@ const MaybePayCheckoutPage = memo(() => {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  // Smooth slider handler
+  const handleSliderChange = useCallback(
+    (newValue: number) => {
+      if (newValue === lastPercentageRef.current) return
+
+      setPercentage(newValue)
+      lastPercentageRef.current = newValue
+    },
+    []
+  )
 
   // Update custom price when slider changes
   useEffect(() => {
@@ -259,38 +274,76 @@ const MaybePayCheckoutPage = memo(() => {
 
               <div className="space-y-6">
                 {/* Slider Section */}
-                <div>
+                <div className="mb-6 relative select-none">
                   <label
                     htmlFor="odds-slider"
                     className="block text-sm font-medium text-stone-700 mb-4"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
                     Adjust your odds:{' '}
-                    <span className="font-mono">{percentage}%</span>
+                    <span style={{ fontFamily: 'ui-monospace, monospace' }}>
+                      {percentage}%
+                    </span>
                   </label>
-                  <div className="relative w-full h-3 bg-stone-300 rounded-full">
+                  <div
+                    id="odds-slider"
+                    ref={sliderRef}
+                    className="relative w-full h-3 bg-stone-300 rounded-full cursor-pointer select-none"
+                    role="slider"
+                    aria-valuenow={percentage}
+                    aria-valuemin={10}
+                    aria-valuemax={90}
+                    tabIndex={0}
+                    onClick={(e) => {
+                      const rect = e.currentTarget.getBoundingClientRect()
+                      const clickX = e.clientX - rect.left
+                      const newValue = Math.round(10 + (clickX / rect.width) * 80)
+                      const clampedValue = Math.max(10, Math.min(90, newValue))
+                      handleSliderChange(clampedValue)
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+                        e.preventDefault()
+                        const newValue = Math.max(10, percentage - 5)
+                        handleSliderChange(newValue)
+                      } else if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+                        e.preventDefault()
+                        const newValue = Math.min(90, percentage + 5)
+                        handleSliderChange(newValue)
+                      }
+                    }}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onDragStart={(e) => e.preventDefault()}
+                  >
                     <div
-                      className="h-full bg-stone-900 rounded-full transition-all duration-200"
+                      className="h-full bg-stone-900 rounded-full transition-none pointer-events-none"
                       style={{
                         width: `${((percentage - 10) / (90 - 10)) * 100}%`,
                       }}
                     />
-                    <div
+                    <motion.div
                       className="absolute top-1/2 w-5 h-5 bg-stone-900 border-2 border-white rounded-full shadow-lg cursor-grab select-none"
                       style={{
                         left: `calc(${((percentage - 10) / (90 - 10)) * 100}% - 10px)`,
-                        transform: 'translateY(-50%)',
+                        y: '-50%',
                       }}
-                    />
-                    <input
-                      id="odds-slider"
-                      type="range"
-                      min="10"
-                      max="90"
-                      value={percentage}
-                      onChange={(e) =>
-                        setPercentage(Number.parseInt(e.target.value))
-                      }
-                      className="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
+                      drag="x"
+                      dragConstraints={{ left: 0, right: 0 }}
+                      dragElastic={0}
+                      onDragStart={() => setIsDragging(true)}
+                      onDragEnd={() => setIsDragging(false)}
+                      onDrag={(_, info) => {
+                        if (sliderRef.current) {
+                          const rect = sliderRef.current.getBoundingClientRect()
+                          const newX = info.point.x - rect.left
+                          const newValue = Math.round(10 + (newX / rect.width) * 80)
+                          const clampedValue = Math.max(10, Math.min(90, newValue))
+                          handleSliderChange(clampedValue)
+                        }
+                      }}
+                      whileHover={{ scale: 1.05 }}
+                      whileDrag={{ scale: 1.1, cursor: 'grabbing' }}
+                      animate={isDragging ? { scale: 1.1 } : { scale: 1 }}
                     />
                   </div>
                   <div className="flex justify-between text-xs text-stone-600 mt-2">
