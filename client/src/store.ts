@@ -47,6 +47,7 @@ type Store = {
 
   placeOrder: (price: bigint) => Promise<void>
   syncOrders: () => Promise<void>
+  syncInventory: () => Promise<void>
   startSync: () => void
   stopSync: () => void
   getInventory: (productId: string) => InventoryItem[]
@@ -64,6 +65,11 @@ const publicClient = createPublicClient({
   transport: http(),
 })
 
+const colorMap: Record<string, string> = {
+  'stone': '#1c1917',
+  'ice': '#e7e5e4',
+}
+
 const walletClient = createWalletClient({
   chain: foundry,
   transport: http(),
@@ -75,39 +81,7 @@ export const useStore = create<Store>((set, get) => ({
   isPlacing: false,
   syncInterval: undefined,
   lastPlacedOrderId: undefined,
-  inventory: {
-    '1': [
-      { color: '#1c1917', size: 'S', stock: 5 },
-      { color: '#1c1917', size: 'M', stock: 8 },
-      { color: '#1c1917', size: 'L', stock: 3 },
-      { color: '#1c1917', size: 'XL', stock: 2 },
-      { color: '#e7e5e4', size: 'S', stock: 4 },
-      { color: '#e7e5e4', size: 'M', stock: 6 },
-      { color: '#e7e5e4', size: 'L', stock: 7 },
-      { color: '#e7e5e4', size: 'XL', stock: 1 },
-    ],
-    '2': [
-      { color: '#1c1917', size: 'S', stock: 3 },
-      { color: '#1c1917', size: 'M', stock: 5 },
-      { color: '#1c1917', size: 'L', stock: 4 },
-      { color: '#1c1917', size: 'XL', stock: 2 },
-      { color: '#e7e5e4', size: 'S', stock: 2 },
-      { color: '#e7e5e4', size: 'M', stock: 8 },
-      { color: '#e7e5e4', size: 'L', stock: 6 },
-      { color: '#e7e5e4', size: 'XL', stock: 3 },
-    ],
-    '3': [
-      { color: '#1c1917', size: 'S', stock: 6 },
-      { color: '#1c1917', size: 'M', stock: 9 },
-      { color: '#1c1917', size: 'L', stock: 5 },
-      { color: '#1c1917', size: 'XL', stock: 4 },
-      { color: '#e7e5e4', size: 'S', stock: 3 },
-      { color: '#e7e5e4', size: 'M', stock: 7 },
-      { color: '#e7e5e4', size: 'L', stock: 8 },
-      { color: '#e7e5e4', size: 'XL', stock: 2 },
-    ],
-    '4': [{ color: '#1c1917', stock: 12 }],
-  },
+  inventory: {},
 
   placeOrder: async (price: bigint) => {
     set({ isPlacing: true })
@@ -199,13 +173,41 @@ export const useStore = create<Store>((set, get) => ({
     }
   },
 
+  syncInventory: async () => {
+    try {
+      const response = await fetch(`${SERVER_URL}/inventory`)
+      if (!response.ok) throw new Error('failed to fetch inventory')
+      const serverInventory = (await response.json()) as Record<string, Array<{color: string, size?: string, stock: number}>>
+      
+      const mappedInventory: Record<string, InventoryItem[]> = {}
+      for (const [productId, items] of Object.entries(serverInventory)) {
+        mappedInventory[productId] = items.map(item => {
+          const hexColor = colorMap[item.color]
+          if (!hexColor) {
+            throw new Error(`Unknown color: ${item.color}`)
+          }
+          return {
+            ...item,
+            color: hexColor,
+          }
+        })
+      }
+      
+      set({ inventory: mappedInventory })
+    } catch (error) {
+      console.error('failed to sync inventory:', error)
+    }
+  },
+
   startSync: () => {
     const { syncInterval } = get()
     if (syncInterval) clearInterval(syncInterval)
 
     get().syncOrders()
+    get().syncInventory()
     const interval = setInterval(() => {
       get().syncOrders()
+      get().syncInventory()
     }, 10_000)
 
     set({ syncInterval: interval })

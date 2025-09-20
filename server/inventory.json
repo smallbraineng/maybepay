@@ -1,0 +1,35 @@
+{
+  "1": [
+    { "color": "stone", "size": "S", "stock": 5 },
+    { "color": "stone", "size": "M", "stock": 8 },
+    { "color": "stone", "size": "L", "stock": 3 },
+    { "color": "stone", "size": "XL", "stock": 2 },
+    { "color": "ice", "size": "S", "stock": 4 },
+    { "color": "ice", "size": "M", "stock": 6 },
+    { "color": "ice", "size": "L", "stock": 7 },
+    { "color": "ice", "size": "XL", "stock": 1 }
+  ],
+  "2": [
+    { "color": "stone", "size": "S", "stock": 3 },
+    { "color": "stone", "size": "M", "stock": 5 },
+    { "color": "stone", "size": "L", "stock": 4 },
+    { "color": "stone", "size": "XL", "stock": 2 },
+    { "color": "ice", "size": "S", "stock": 2 },
+    { "color": "ice", "size": "M", "stock": 8 },
+    { "color": "ice", "size": "L", "stock": 6 },
+    { "color": "ice", "size": "XL", "stock": 3 }
+  ],
+  "3": [
+    { "color": "stone", "size": "S", "stock": 6 },
+    { "color": "stone", "size": "M", "stock": 9 },
+    { "color": "stone", "size": "L", "stock": 5 },
+    { "color": "stone", "size": "XL", "stock": 4 },
+    { "color": "ice", "size": "S", "stock": 3 },
+    { "color": "ice", "size": "M", "stock": 7 },
+    { "color": "ice", "size": "L", "stock": 8 },
+    { "color": "ice", "size": "XL", "stock": 2 }
+  ],
+  "4": [
+    { "color": "stone", "stock": 12 }
+  ]
+}
