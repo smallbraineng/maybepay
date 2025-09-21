@@ -9,7 +9,9 @@ import {
 } from 'viem'
 import { privateKeyToAccount } from 'viem/accounts'
 import * as chains from 'viem/chains'
+import { getStock, writeOrder } from './db'
 import type { RngData } from './setupRng'
+import { OrderInputSchema, hashOrder } from './types'
 
 const privateKey = process.argv[2] as Hex
 const chainId = Number.parseInt(process.argv[3] as string)
@@ -39,10 +41,10 @@ const walletClient = createWalletClient({
 
 const abi = parseAbi([
   'function orderIndex() view returns (uint256)',
-  'function orders(uint256) view returns (uint256 value, uint256 price, uint256 timestamp, address buyer, uint8 status)',
+  'function orders(uint256) view returns (uint256 value, uint256 price, uint256 timestamp, address buyer, uint8 status, string metadata)',
   'function processOrder(uint256 id, uint256 ownerRng) external',
   'function setCommitment(uint256 id, bytes32 commitment) external',
-  'event OrderPlaced(uint256 indexed id, uint256 value, uint256 price, address buyer)',
+  'event OrderPlaced(uint256 indexed id, uint256 value, uint256 price, address buyer, string metadata)',
   'event OrderProcessed(uint256 indexed id, uint8 status)',
 ])
 
@@ -95,7 +97,10 @@ type Order = {
   timestamp: bigint
   buyer: Address
   status: Status
+  metadata: string
 }
+
+// Item, enums, and getItemId are imported from ./types
 
 const orders: Order[] = []
 
@@ -121,6 +126,7 @@ const indexOrders = async () => {
       timestamp: orderData[2],
       buyer: orderData[3],
       status: getStatus(orderData[4]),
+      metadata: orderData[5],
     })
   }
 }
@@ -161,36 +167,105 @@ const processPendingOrders = async () => {
 }
 
 const syncLoop = async () => {
-  await indexOrders()
-  await processPendingOrders()
-  setTimeout(syncLoop, 5_000)
+  try {
+    await indexOrders()
+    await processPendingOrders()
+    setTimeout(syncLoop, 5_000)
+  } catch (error) {
+    console.error('failed to sync, trying again', error)
+  }
 }
 
 const server = Bun.serve({
   port: 8787,
-  fetch(request) {
-    const url = new URL(request.url)
+  routes: {
+    '/orders': {
+      GET(req) {
+        const url = new URL(req.url)
+        const page = Number.parseInt(url.searchParams.get('page') || '0')
+        const sortedOrders = orders.sort((a, b) =>
+          Number(b.timestamp - a.timestamp)
+        )
+        const paginatedOrders = sortedOrders.slice(page * 100, (page + 1) * 100)
 
-    if (url.pathname === '/orders') {
-      const page = Number.parseInt(url.searchParams.get('page') || '0')
-      const sortedOrders = orders.sort((a, b) =>
-        Number(b.timestamp - a.timestamp)
-      )
-      const paginatedOrders = sortedOrders.slice(page * 100, (page + 1) * 100)
+        const response = Response.json(
+          paginatedOrders.map((order) => ({
+            ...order,
+            value: order.value.toString(),
+            price: order.price.toString(),
+            timestamp: order.timestamp.toString(),
+          }))
+        )
+        response.headers.set('Access-Control-Allow-Origin', '*')
+        response.headers.set('Access-Control-Allow-Methods', 'GET')
+        return response
+      },
+    },
+    '/inventory': {
+      GET() {
+        const response = Response.json(getStock())
+        response.headers.set('Access-Control-Allow-Origin', '*')
+        response.headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS')
+        return response
+      },
+    },
+    '/confirm': {
+      OPTIONS() {
+        const response = new Response(null, { status: 204 })
+        response.headers.set('Access-Control-Allow-Origin', '*')
+        response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+        return response
+      },
+      async POST(req) {
+        const parsed = OrderInputSchema.parse(await req.json())
 
-      const response = Response.json(
-        paginatedOrders.map((order) => ({
-          ...order,
-          value: order.value.toString(),
-          price: order.price.toString(),
-          timestamp: order.timestamp.toString(),
-        }))
-      )
-      response.headers.set('Access-Control-Allow-Origin', '*')
-      response.headers.set('Access-Control-Allow-Methods', 'GET')
-      return response
-    }
+        // get the order from the order id
+        const order = orders.find((order) => order.id === parsed.orderId)
+        if (!order) {
+          return Response.json({ error: 'order not found' }, { status: 400 })
+        }
+        // order status must not be pending
+        if (order.status === Status.PENDING) {
+          return Response.json({ error: 'order is pending' }, { status: 400 })
+        }
+        // order metadata must match passed metadata
+        const orderHash = hashOrder(parsed)
+        if (orderHash !== order.metadata) {
+          return Response.json(
+            { error: 'order metadata does not match' },
+            { status: 400 }
+          )
+        }
 
+        writeOrder(parsed.orderId, parsed.email, parsed.address, parsed.items)
+
+        return Response.json({ ok: true })
+      },
+    },
+    '/hash': {
+      OPTIONS() {
+        const response = new Response(null, { status: 204 })
+        response.headers.set('Access-Control-Allow-Origin', '*')
+        response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS')
+        response.headers.set('Access-Control-Allow-Headers', 'Content-Type')
+        return response
+      },
+      async POST(req) {
+        const parsed = OrderInputSchema.parse(await req.json())
+        const digest = hashOrder(parsed)
+        const r = new Response(digest, {
+          headers: {
+            'Content-Type': 'text/plain; charset=ascii',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+          },
+        })
+        return r
+      },
+    },
+  },
+  fetch() {
     return new Response('not found', { status: 404 })
   },
 })

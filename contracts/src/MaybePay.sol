@@ -17,10 +17,17 @@ contract MaybePay is Owned {
         uint256 timestamp;
         address buyer;
         Status status;
+        string metadata;
     }
 
     // events
-    event OrderPlaced(uint256 id, uint256 value, uint256 price, address buyer);
+    event OrderPlaced(
+        uint256 id,
+        uint256 value,
+        uint256 price,
+        address buyer,
+        string metadata
+    );
     event OrderProcessed(uint256 id, Status status);
 
     // state
@@ -41,9 +48,18 @@ contract MaybePay is Owned {
     function processOrder(uint256 id, uint256 ownerRng) public onlyOwner {
         Order storage order = orders[id];
         require(order.status == Status.PENDING, "order not pending");
-        require(keccak256(abi.encodePacked(id, ownerRng)) == rngCommitments[id], "invalid rng");
-        uint256 rng = uint256(keccak256(abi.encodePacked(id, ownerRng, order.value)));
-        Status status = getStatus({value: order.value, price: order.price, rng: rng});
+        require(
+            keccak256(abi.encodePacked(id, ownerRng)) == rngCommitments[id],
+            "invalid rng"
+        );
+        uint256 rng = uint256(
+            keccak256(abi.encodePacked(id, ownerRng, order.value))
+        );
+        Status status = getStatus({
+            value: order.value,
+            price: order.price,
+            rng: rng
+        });
         order.status = status;
 
         if (status == Status.PAID) {
@@ -56,19 +72,29 @@ contract MaybePay is Owned {
     }
 
     // public: everyone
-    function placeOrder(uint256 price) public payable {
+    function placeOrder(uint256 price, string memory metadata) public payable {
         uint256 value = msg.value;
         require(value >= price, "value must be geq price");
         require(price > 0, "price must be greater than 0");
-        orders[orderIndex] =
-            Order({buyer: msg.sender, value: value, price: price, timestamp: block.timestamp, status: Status.PENDING});
+        orders[orderIndex] = Order({
+            buyer: msg.sender,
+            value: value,
+            price: price,
+            timestamp: block.timestamp,
+            status: Status.PENDING,
+            metadata: metadata
+        });
         orderIndex++;
 
-        emit OrderPlaced(orderIndex - 1, value, price, msg.sender);
+        emit OrderPlaced(orderIndex - 1, value, price, msg.sender, metadata);
     }
 
     // helpers
-    function getStatus(uint256 value, uint256 price, uint256 rng) public pure returns (Status) {
+    function getStatus(
+        uint256 value,
+        uint256 price,
+        uint256 rng
+    ) public pure returns (Status) {
         return price > (rng % value) ? Status.PAID : Status.FREE;
     }
 }
